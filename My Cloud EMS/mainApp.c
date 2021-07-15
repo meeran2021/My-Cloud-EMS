@@ -1,7 +1,4 @@
-#include<conio.h>
-void main{
-
-} 
+#include<conio.h> 
 
 FILE *fPtr
 
@@ -15,6 +12,5 @@ void main
 {
     printf("Hello Buddy, We need to look more, upon github functioning and coding stuffs");
     printf("have a nice night");
-
-
+    
 }
