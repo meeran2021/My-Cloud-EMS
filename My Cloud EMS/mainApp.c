@@ -14,5 +14,7 @@ struct studentInfo
 void main
 {
     printf("Hello Buddy, We need to look more, upon github functioning and coding stuffs");
+    printf("have a nice night");
+
 
 }
