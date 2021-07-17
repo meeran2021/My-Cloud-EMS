@@ -1,0 +1,144 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<ctype.h>
+#include<string.h>
+
+
+
+char pass[30];
+FILE *fPtr;
+
+struct CourseInfo
+{
+    char dgreName[15], brnchName[40], spclName[50], subName[50], subType[10];
+    int subCode;
+};
+
+struct empInfo
+{
+    char empName[40], empSex[10], empMail[35], empQlfn[100], empType[10];
+    unsigned long long empSysID, empMobNum;
+}emp;
+
+struct studentInfo
+{
+    char stFstName[20], stLstName[20], stName[41], stSex[10], stMail[40], CurAdrs[100], PermAdrs[100];  
+    unsigned long long stSysID, stMobNum;
+}stud;
+
+struct parentsInfo
+{
+    char fthrName[40], mthrName[40], prntMail[40];
+    unsigned long long ftrMobNum;
+};
+
+const char* getLoginType();
+void NewEmployee();
+void setPass();
+void passDB();
+
+
+
+
+const char* getLoginType()
+{
+    int choice;
+    printf("\nSelect Login Type ");
+    printf("\n1. Student");
+    printf("\n2. Employee");
+    printf("\n0. Exit");
+    scanf("%d",&choice);
+    if(choice==1)
+    {
+        //char *type= Student;
+        return "Student";
+    }
+    else if( choice == 2)
+    {
+        return "Employee";
+    }
+    else if(choice==0)
+    {
+        exit(0);
+    }
+    else
+    {
+        printf("\nInvalid Choice!!!\nChoose Again");
+        getLoginType();
+    }
+}
+
+
+void setPass()
+{
+    char confirmPass[30];
+    printf("\nEnter System ID: ");
+    scanf("%llu", &emp.empSysID);
+    printf("Enter Password ");
+    scanf("%s",&pass);
+    printf("Enter Password Again ");
+    scanf("%s",&confirmPass);
+    if(strcmp(confirmPass,pass)!=0)
+    {
+        ///printf("%s %s",pass,confirmPass);
+        printf("\nPassword does not match!!!");
+        printf("\nTry again and Enter the same password ");
+        setPass();
+    }
+    else
+    {
+        passDB();
+        //printf("\nPassword has been Set.");
+    }
+    
+}
+// void passStrength(char pass[30])
+// {
+//     if (strlen(pass)<=8)
+//     {
+//         printf("\nPassword strength Too Low:(");
+//         printf("\nChoose a srtong password.");
+//     }
+    
+// }
+
+void passDB()           //id as argument which contains login type in it
+{
+    
+    fPtr=fopen("passDataBase.txt","a");
+    if (fPtr==NULL)
+    {
+        printf("\nCan't Open File ");
+        exit(1);
+    }
+    else
+    {
+        fflush(stdin);
+        fprintf(fPtr,"\n%llu,%s",emp.empSysID,pass);
+        fclose(fPtr);
+        printf("\nPassword has been Set.");
+       
+    }
+    
+    fPtr=NULL;
+}
+
+
+
+
+void main()
+{
+    int reply;
+    printf("\n\t\tWelcome to");
+    printf("\n\t\tMy Cloud EMS");
+    printf("\n\n\n");
+    printf("\n1. New User?? Sign Up");
+    printf("\n2. Existing User?? Login");
+    printf("\n");
+    scanf("%d",&reply);
+    if(reply==1)
+    {
+        //getLoginType();
+        setPass();
+    }
+}
