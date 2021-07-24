@@ -58,15 +58,32 @@ const char *getUserType(int choice) //Returns pointer to character which store a
 void setPass(unsigned long long sysID) // Sets New Password for the user.
 {
     char confirmPass[30];
-    printf("Enter Password ");
-    scanf("%s", &pass);
-    passStrength(pass); // Checks the strength of password.
-    printf("Enter Password Again ");
+    while (1)
+    {
+        printf("Enter Password: ");
+        scanf("%s", &pass);
+        // Checks the strength of password.
+        const char *strngth = passStrength(pass, sysID);
+        printf("Password Strength: %s\n", strngth);
+        if (strcmp(strngth, "Poor") == 0)
+        {
+            printf("Choose a strong password\n");
+        }
+        else if (strcmp(strngth, "Length Error") == 0)
+        {
+            printf("Length of password must be between 8-25 characters\n");
+        }
+        else
+        {
+            break;
+        }
+    }
+    printf("Confirm Password: ");
     scanf("%s", &confirmPass);
     if (strcmp(confirmPass, pass) != 0)
     {
         printf("\nPassword does not match!!!");
-        printf("\nTry Again... ");
+        printf("\nTry Again... \n");
         setPass(sysID); // Recursion
     }
     else
@@ -81,53 +98,61 @@ void setPass(unsigned long long sysID) // Sets New Password for the user.
         }
     }
 }
-void passStrength(char pass[25]) // Checks the strength of Password (Need some modifications)
+const char *passStrength(char pass[25], unsigned long long sysID)
 {
-    int i = 0, check = 0 ,spclSymb = 0, num = 0, upCase = 0, lowCase = 0;
-    char x;
-    if (strlen(pass) <= 8)
-        printf("Password must be atleast 8 Characters\n");
-    else if (strlen(pass) > 20)
-        printf("Password must be atmost 20 Characters\n");
-    else
+    while (1)
     {
-        while (pass[i] != '\0')
+        int i = 0, strength = 0;
+        char x;
+        int spclSymb = 0, num = 0, upCase = 0, lowCase = 0;
+        if (strlen(pass) < 8 || strlen(pass) > 25)
         {
-            x = (int)pass[i];
-            if (x >= 97 && x <= 122)
-                lowCase = 1;
-
-            if (x >= 65 && x <= 90)
-                upCase = 1;
-
-            if (x >= 48 && x <= 57)
-                num = 1;
-
-            if ((x >= 32 && x <= 47) || (x >= 58 && x <= 64) || (x >= 91 && x <= 96) || (x >= 123 && x <= 126))
-                spclSymb = 1;
-
-            i++;
+            return "Length Error";
         }
-
-        if (lowCase)
-            check += 10;
-        if (upCase)
-            check += 10;
-        if (num)
-            check += 10;
-        if (spclSymb)
-            check += 10;
-
-        if (check == 40)
-            printf("Password Strength: Excellent \n");
-        else if (check == 30)
-            printf("Password Strength: Very Good\n");
-        else if (check == 20)
-            printf("Password Strength: Average\n");
         else
-            printf("Password Strength: Poor\n");
+        {
+            while (pass[i] != '\0')
+            {
+                x = (int)pass[i];
+                if (x >= 97 && x <= 122)
+                    lowCase = 1;
+
+                if (x >= 65 && x <= 90)
+                    upCase = 1;
+
+                if (x >= 48 && x <= 57)
+                    num = 1;
+
+                if ((x > 32 && x <= 43) || (x >= 91 && x <= 96) || (x == 64))
+                    spclSymb = 1;
+
+                i++;
+            }
+            if (lowCase)
+                strength += 10;
+            if (upCase)
+                strength += 10;
+            if (num)
+                strength += 10;
+            if (spclSymb)
+                strength += 10;
+
+            if (strength == 40)
+            {
+                return "Excellent";
+            }
+            else if (strength == 30)
+            {
+                return "Average";
+            }
+            else
+            {
+                return "Poor";
+            }
+        }
     }
 }
+
 
 void passDB(unsigned long long sysID, char pass[], int choice) // Store ID Password into respective database
 {
