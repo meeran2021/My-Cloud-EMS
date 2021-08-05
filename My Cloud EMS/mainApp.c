@@ -1,30 +1,27 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<ctype.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
+int choice;    // Used as an argument in getUserType() function.
+char pass[30]; // To store password of user.
+FILE *fPtr;    // To store returned address of fopen function.
 
-int choice;             // Used as an argument in getUserType() function.
-char pass[30];          // To store password of user.
-FILE *fPtr;             // To store returned address of fopen function.
-
-struct CourseInfo       // To store Course Info.
+struct CourseInfo // To store Course Info.
 {
     char dgreName[15], brnchName[40], spclName[50], subName[50], subType[10];
     int subCode;
 };
 
-
-
-struct PrsnlInfo        // To store personal details of Students and Employee
+struct PrsnlInfo // To store personal details of Students and Employee
 {
     char fstName[20], lstName[20], name[41], sex[10];
     char eMail[40], CurAdrs[100], PermAdrs[100];
-    char qlifcn[100];  
+    char qlifcn[100];
     unsigned long long sysID, mobNum;
-}stud,emp;              // stud->Student's Variable; emp->Employee's Variable
+} stud, emp; // stud->Student's Variable; emp->Employee's Variable
 
-struct parentsInfo      // To store Parents detail of Student
+struct parentsInfo // To store Parents detail of Student
 {
     char fthrName[40], mthrName[40], prntMail[40];
     unsigned long long ftrMobNum;
@@ -32,127 +29,147 @@ struct parentsInfo      // To store Parents detail of Student
 
 //List of Function used in the program:-
 
-const char* getUserType();
+const char *getUserType();
 void setPass();
-void passStrength(char pass[25]);
+const char *passStrength(unsigned long long sysID, char pass[]);
 void passDB();
+const char *verifyAcc(unsigned long long sysID, char pass[25]);
 
 
-
-
-const char* getUserType(int choice)     //Returns pointer to character which store adddress of string. Returns User Type
+const char *getUserType(int choice) //Returns pointer to character which store adddress of string. Returns User Type
 {
-    if(choice==1)
+    if (choice == 1)
     {
         return "Student";
     }
-    else if(choice == 2)
+    else if (choice == 2)
     {
         return "Employee";
     }
-    else if(choice==0)
+    else if (choice == 0)
     {
         exit(0);
     }
     else
     {
-        printf("%d",choice);
-        printf("\nInvalid Choice!!!\nChoose Again");
-        getUserType(choice);            // Recursion
+        return "Again";
     }
 }
 
-
-void setPass(unsigned long long sysID)      // Sets New Password for the user.
+void setPass(unsigned long long sysID) // Sets New Password for the user.
 {
     char confirmPass[30];
-    printf("Enter Password ");
-    scanf("%s",&pass);
-    passStrength(pass);                      // Checks the strength of password.
-    printf("Enter Password Again ");
-    scanf("%s",&confirmPass);
-    if(strcmp(confirmPass,pass)!=0)
+    while (1)
+    {
+        printf("Enter Password: ");
+        scanf("%s", &pass);
+        // Checks the strength of password.
+        const char *strngth = passStrength(sysID, pass);
+        printf("Password Strength: %s\n", strngth);
+        if (strcmp(strngth, "Poor") == 0)
+        {
+            printf("Choose a strong password\n");
+        }
+        else if (strcmp(strngth, "Length Error") == 0)
+        {
+            printf("Length of password must be between 8-25 characters\n");
+        }
+        else
+        {
+            break;
+        }
+    }
+    printf("Confirm Password: ");
+    scanf("%s", &confirmPass);
+    if (strcmp(confirmPass, pass) != 0)
     {
         printf("\nPassword does not match!!!");
-        printf("\nTry Again... ");
-        setPass(sysID);                       // Recursion
+        printf("\nTry Again... \n");
+        setPass(sysID); // Recursion
     }
     else
     {
-        if(strcmp(getUserType(choice),"Employee")==0)
+        if (strcmp(getUserType(choice), "Employee") == 0)
         {
-            passDB(emp.sysID,pass,choice);       // Passed Employee's System ID 
+            passDB(emp.sysID, pass, choice); // Passed Employee's System ID
         }
-        if(strcmp(getUserType(choice),"Student")==0)
+        if (strcmp(getUserType(choice), "Student") == 0)
         {
-            passDB(stud.sysID,pass,choice);      // Passed Student's System ID 
+            passDB(stud.sysID, pass, choice); // Passed Student's System ID
         }
     }
-    
-}
-void passStrength(char pass[25])            // Checks the strength of Password (Need some modifications)
-{
-    int i=0, check=0;
-    char x;
-    int spclSymb=0,num=0,upCase=0,lowCase=0;
-    // if (pass==ltoa(emp.empSysID))
-    //     printf("Enter password other than System ID\n");
-    if (strlen(pass)<=8)
-        printf("Password must be atleast 8 Characters\n");
-    else if (strlen(pass)>20)
-        printf("Password must be atmost 20 Characters\n");
-    else
-    {      
-        while (pass[i]!='\0')
-        {
-            x=(int)pass[i];
-            if  (x>=97 && x<=122)
-                lowCase=1;
-
-            if (x>=65 && x<=90)
-                upCase=1;
-
-            if (x>=48 && x<=57)
-                num=1;
-
-            if ((x>=32 && x<=47) || (x>=58 && x<=64) || (x>=91 && x<=96) || (x>=123 && x<=126))  
-                spclSymb=1;
-
-            i++;
-        } 
-
-    if (lowCase) check+=10;
-    if (upCase) check+=10;
-    if (num) check+=10;
-    if (spclSymb) check+=10;
-
-    if (check==40)
-        printf("Password Strength: Excellent \n");
-    else if (check==30)
-        printf("Password Strength: Very Good\n");
-    else if (check==20)
-        printf("Password Strength: Average\n");
-    else
-        printf("Password Strength: Poor\n");
-    }     
 }
 
 
-void passDB(unsigned long long sysID, char pass[],int choice)     // Store ID Password into respective database
+const char *passStrength(unsigned long long sysID, char pass[25])
 {
-    if(strcmp(getUserType(choice),"Employee")==0)
+    while (1)
     {
-        fPtr=fopen("EmpPassDataBase.txt","a");                     // Opening Employee's Database
+        int i = 0, strength = 0;
+        char x;
+        int spclSymb = 0, num = 0, upCase = 0, lowCase = 0;
+        if (strlen(pass) < 8 || strlen(pass) > 25)
+        {
+            return "Length Error";
+        }
+        else
+        {
+            while (pass[i] != '\0')
+            {
+                x = (int)pass[i];
+                if (x >= 97 && x <= 122)
+                    lowCase = 1;
+
+                if (x >= 65 && x <= 90)
+                    upCase = 1;
+
+                if (x >= 48 && x <= 57)
+                    num = 1;
+
+                if ((x > 32 && x <= 43) || (x >= 91 && x <= 96) || (x == 64))
+                    spclSymb = 1;
+
+                i++;
+            }
+            if (lowCase)
+                strength += 10;
+            if (upCase)
+                strength += 10;
+            if (num)
+                strength += 10;
+            if (spclSymb)
+                strength += 10;
+
+            if (strength == 40)
+            {
+                return "Excellent";
+            }
+            else if (strength == 30)
+            {
+                return "Average";
+            }
+            else
+            {
+                return "Poor";
+            }
+        }
     }
-    else if(strcmp(getUserType(choice),"Student")==0)
+}
+void passDB(unsigned long long sysID, char pass[], int choice) // Store ID Password into respective database
+{
+    if (strcmp(getUserType(choice), "Employee") == 0)
     {
-        fPtr=fopen("StPassDataBase.txt","a");                       // Opening Stident's Database
+        fPtr = fopen("EmpPassDataBase.txt", "a"); // Opening Employee's Database
+    }
+    else if (strcmp(getUserType(choice), "Student") == 0)
+    {
+        fPtr = fopen("StPassDataBase.txt", "a"); // Opening Stident's Database
     }
     else
     {
         printf("ERROR... Can't find database:(");
     }
-    if (fPtr==NULL)
+    if (fPtr == NULL)
     {
         printf("\nCan't Open File ");
         exit(1);
@@ -160,18 +177,66 @@ void passDB(unsigned long long sysID, char pass[],int choice)     // Store ID Pa
     else
     {
         fflush(stdin);
-        fprintf(fPtr,"\n%llu,%s",sysID,pass);                       // Writing id pass into text file
-        fclose(fPtr);                                               // Closing text file
+        fprintf(fPtr, "\n%llu,%s", sysID, pass); // Writing id pass into text file
+        fclose(fPtr);                            // Closing text file
         printf("\nPassword has been Set.");
-       
     }
-    fPtr=NULL;                                                      // Resetting FILE pointer to NULL
+    fPtr = NULL; // Resetting FILE pointer to NULL
 }
 
 
-void main()                                                          // Start 
+const char *verifyAcc(unsigned long long sysID, char pass[25])
 {
-    int reply;                                   // To store user's choice for operations    
+    char ch,st[50], id[12], oPass[25];      // To store data from file
+    if (fPtr==NULL)
+    {
+        return "File Error";
+    }
+    else
+    {
+        while (1)
+        {
+            ch = fgetc(fPtr);         //Reading the first character and moving the cursor to next one
+            if(ch==EOF)
+            {
+                return "EOF Error";
+                break;
+            }
+            else
+            {
+                fscanf(fPtr, "%[^\n]", st); // Reading line from file
+                char* tok = strtok(st,",");     // Splitting the string 
+                strcpy(id,tok);
+                while(tok!=NULL)
+                {
+                    if (sysID==atoi(id))      // Convirting string to int and comparing
+                    {
+                        tok = strtok(NULL,",");     // Accessing next token
+                        strcpy(oPass,tok);          
+                        if (strcmp(pass,oPass)==0)
+                        {
+                            return "Matched";
+                            break;  
+                        }
+                        else
+                        { 
+                            return "Wrong Password";
+                            break;
+                        }  
+                    }
+                    break;                   
+                }
+            }
+        }
+    }
+    fclose(fPtr);
+    fPtr==NULL;
+}
+
+
+void main() // Start
+{
+    int reply; // To store user's choice for operations
     printf("\n\n\n");
     printf("\n\t\t\t   Welcome");
     printf("\n\t\t ###### My Cloud EMS ######");
@@ -181,36 +246,79 @@ void main()                                                          // Start
     printf("\n2. Employee");
     printf("\n0. Exit");
     printf("\n");
-    scanf("%d",&choice);                    
-    getUserType(choice);                 // Getting the type of User ie.., Student or Employee
-    if(strcmp(getUserType(choice),"Employee")==0)      
-    {                                                  // Menue for Employee                 
-        printf("\n1. New User?? Sign Up");
-        printf("\n2. Existing User?? Login");
-        printf("\n9. Exit");
-        printf("\n");
-        scanf("%d",&reply);
-        if(reply==1)
+    
+    while (1)
+    {
+        scanf("%d", &choice);
+        getUserType(choice); // Getting the type of User ie.., Student or Employee
+        if (strcmp(getUserType(choice), "Employee") == 0)
+        { // Menue for Employee
+            printf("\n1. New User?? Sign Up");
+            printf("\n2. Existing User?? Login");
+            printf("\n9. Exit");
+            printf("\n");
+            scanf("%d", &reply);
+            if (reply == 1)
+            {
+                printf("\nEnter System ID: ");
+                scanf("%llu", &emp.sysID);
+                setPass(emp.sysID); // calling function to set password
+                
+            }
+            if (reply == 2)
+            {   
+                fPtr = fopen("EmpPassDataBase.txt","r");
+                while(1)           // To ask for id pass again in case of wrong id pass
+                {
+                    printf("\nEnter System ID: ");
+                    scanf("%llu",&emp.sysID);
+                    printf("\nEnter Password: ");
+                    scanf("%s", &pass);
+                    
+                    if(strcmp(verifyAcc(emp.sysID,pass),"Matched")==0)
+                    {
+                        printf("\n Welcome:)");
+                        break;
+                    }
+                    else
+                    {
+                        printf("\n%s",verifyAcc(emp.sysID,pass));   // Printing the returning value
+                        printf("\nRetry");
+                        // printf("\nPress 1 to exit");
+                        
+                    }
+                }
+            }
+            break;
+        }
+        else if (strcmp(getUserType(choice), "Student") == 0)
+        { 
+            fPtr = fopen("StPassDataBase.txt","r");
+            while (1)
+            {
+                printf("\nEnter System ID: ");
+                scanf("%llu", &stud.sysID);
+                printf("\nEnter Password: ");
+                scanf("%s", pass);
+                if(strcmp(verifyAcc(stud.sysID,pass),"Matched")==0)
+                {
+                    printf("\n Welcome:)");
+                    break;
+                }
+                else
+                {
+                    printf("\n%s",verifyAcc(stud.sysID,pass));    // Printing the returning value
+                    printf("\nRetry");
+                    // printf("\nPress 1 to exit");
+                }
+                
+            }
+        }
+        else if (strcmp(getUserType(choice), "Again") == 0)
         {
-            printf("\nEnter System ID: ");
-            scanf("%llu", &emp.sysID);
-            setPass(emp.sysID);                     // calling function to set password
+            printf("Is an Invalid Choice!!!");
+            printf("\nPlease choose again:\n");
+            continue;
         }
     }
-    else if(strcmp(getUserType(choice),"Student")==0)
-    {                                                   // Menue for Student
-        printf("\nEnter System ID: ");
-        scanf("%llu",stud.sysID);
-        printf("\nEnter Password: ");
-        scanf("%s",pass);
-        //confirm ID and Pass from text file
-        
-    }
-    else
-    {
-        printf("ERROR... ");
-    }
 }
-
-
-
